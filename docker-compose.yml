@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL Database
   db:
     image: mysql:8.0
     restart: always
@@ -20,7 +19,6 @@ services:
     networks:
       - app-network
 
-  # Backend API
   backend:
     build:
       context: ./Back-end
@@ -43,7 +41,6 @@ services:
     networks:
       - app-network
 
-  # Frontend React App
   frontend:
     build:
       context: ./Front-end
