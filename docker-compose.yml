@@ -23,7 +23,7 @@ services:
   # Backend API
   backend:
     build:
-      context: ./backend
+      context: ./Back-end
       dockerfile: Dockerfile
     restart: always
     ports:
@@ -46,7 +46,7 @@ services:
   # Frontend React App
   frontend:
     build:
-      context: ./frontend
+      context: ./Front-end
       dockerfile: Dockerfile
     restart: always
     ports:
