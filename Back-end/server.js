@@ -33,27 +33,6 @@ const sequelize = new Sequelize(
 
 const Product = require("./models/product")(sequelize);
 
-const sampleProducts = [
-  {
-    name: "Laptop",
-    price: 1299.99,
-    description: "High-performance laptop with SSD storage",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    name: "Smartphone",
-    price: 699.99,
-    description: "Latest model with high-resolution camera and fast processor",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    name: "Headphones",
-    price: 199.99,
-    description: "Noise-cancelling wireless headphones",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-];
-
 const initDb = async () => {
   try {
     await sequelize.authenticate();
@@ -62,11 +41,6 @@ const initDb = async () => {
     await sequelize.sync({ force: false }); 
 
     const count = await Product.count();
-
-    if (count === 0) {
-      await Product.bulkCreate(sampleProducts);
-      console.log("Sample products added to database");
-    }
 
     console.log("Database initialized successfully");
   } catch (error) {
@@ -86,38 +60,20 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-app.get("/api/products/:id", async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const product = await Product.findByPk(id);
-
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.json(product);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching product", error: error.message });
-  }
-});
-
 app.post("/api/products", async (req, res) => {
   try {
     const { name, price, description, imageUrl } = req.body;
+    
 
     if (!name || !price) {
       return res.status(400).json({ message: "Name and price are required" });
     }
-
     const newProduct = await Product.create({
       name,
       price: parseFloat(price),
       description: description || "",
-      imageUrl: imageUrl || "https://via.placeholder.com/150",
+      imageUrl: "https://via.placeholder.com/150",
     });
-
     res.status(201).json(newProduct);
   } catch (error) {
     res
@@ -146,7 +102,7 @@ app.put("/api/products/:id", async (req, res) => {
       price: parseFloat(price),
       description:
         description !== undefined ? description : product.description,
-      imageUrl: imageUrl !== undefined ? imageUrl : product.imageUrl,
+      imageUrl: "https://via.placeholder.com/150",
     });
 
     res.json(updatedProduct);
@@ -161,11 +117,9 @@ app.delete("/api/products/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const product = await Product.findByPk(id);
-
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-
     const deletedProduct = { ...product.toJSON() };
     await product.destroy();
 

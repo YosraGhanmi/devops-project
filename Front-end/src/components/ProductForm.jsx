@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/ProductForm.css";
 
 function ProductForm({
@@ -13,24 +13,30 @@ function ProductForm({
     name: "",
     price: "",
     description: "",
-    imageUrl: "",
+    image: "",
   });
 
+  const fileInputRef = useRef(null);
+
+  // When editingProduct changes, update the form data
   useEffect(() => {
     if (editingProduct) {
       setFormData({
         name: editingProduct.name,
         price: editingProduct.price,
         description: editingProduct.description,
-        imageUrl: editingProduct.imageUrl,
+        image: editingProduct.image,
       });
     } else {
       setFormData({
         name: "",
         price: "",
         description: "",
-        imageUrl: "",
+        image: "",
       });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   }, [editingProduct]);
 
@@ -42,17 +48,46 @@ function ProductForm({
     });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Please upload a valid image file (JPEG, PNG, GIF, WEBP)");
+      return;
+    }
+
+    // Check file size (limit to 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image size should be less than 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormData({
+        ...formData,
+        image: event.target.result,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Validate form
     if (!formData.name || !formData.price || !formData.description) {
       alert("Please fill in all required fields");
       return;
     }
 
+    // Use default image if none provided
     const productData = {
       ...formData,
-      imageUrl: formData.imageUrl || "https://via.placeholder.com/150",
+      image: formData.image || "/placeholder.svg?height=150&width=150",
     };
 
     if (editingProduct) {
@@ -61,12 +96,17 @@ function ProductForm({
       addProduct(productData);
     }
 
+    // Reset form
     setFormData({
       name: "",
       price: "",
       description: "",
-      imageUrl: "",
+      image: "",
     });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleCancel = () => {
@@ -75,8 +115,11 @@ function ProductForm({
       name: "",
       price: "",
       description: "",
-      imageUrl: "",
+      image: "",
     });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -119,15 +162,20 @@ function ProductForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="imageUrl">Image URL (optional):</label>
+        <label htmlFor="image">Product Image:</label>
         <input
-          type="text"
-          id="imageUrl"
-          name="imageUrl"
-          value={formData.imageUrl}
-          onChange={handleChange}
-          placeholder="https://via.placeholder.com/150"
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          onChange={handleImageChange}
+          ref={fileInputRef}
         />
+        {formData.image && (
+          <div className="image-preview">
+            <img src={formData.image || "/placeholder.svg"} alt="Preview" />
+          </div>
+        )}
       </div>
 
       <div className="form-actions">
