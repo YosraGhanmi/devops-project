@@ -20,11 +20,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./backend
+        working-directory: ./Back-end
 
       - name: Run tests
         run: npm test
-        working-directory: ./backend
+        working-directory: ./Back-end
 
   deploy:
     needs: build-and-test
